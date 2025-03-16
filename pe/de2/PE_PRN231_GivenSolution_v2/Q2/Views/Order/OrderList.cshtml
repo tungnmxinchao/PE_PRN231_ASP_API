@@ -1,0 +1,77 @@
+﻿@model List<Q1.Dtos.OrderResponse>
+
+@{
+    ViewBag.Title = "Order List";
+}
+
+<h2>Order List</h2>
+
+<!-- Thông báo nếu có -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<!-- Form tìm kiếm đơn hàng theo ngày -->
+<form method="post" action="@Url.Action("SearchOrders", "Order")">
+    <label>From Date:</label>
+    <input type="date" name="fromDate" required />
+
+    <label>To Date:</label>
+    <input type="date" name="toDate" required />
+
+    <button type="submit">Search</button>
+</form>
+
+<!-- Bảng danh sách đơn hàng -->
+<table border="1">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Order Date</th>
+            <th>Required Date</th>
+            <th>Shipped Date</th>
+            <th>Freight</th>
+            <th>Ship Info</th>
+            <th>Customer</th>
+            <th>Employee</th>
+            <th>Department</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.OrderDate</td>
+                <td>@order.RequiredDate?.ToString("yyyy-MM-dd")</td>
+                <td>@order.ShippedDate?.ToString("yyyy-MM-dd")</td>
+                <td>@order.Freight</td>
+                <td>
+                    <strong>@order.ShipName</strong><br />
+                    @order.ShipAddress, @order.ShipCity, @order.ShipRegion, @order.ShipPostalCode, @order.ShipCountry
+                </td>
+                <td>
+                    <strong>@order.CompanyName</strong> (ID: @order.CustomerId)
+                </td>
+                <td>
+                    <strong>@order.FullName</strong> (ID: @order.EmployeeId)
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(order.DepartmentName))
+                    {
+                        <span>@order.DepartmentName (ID: @order.DepartmentId)</span>
+                    }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                <td>
+                    <a href="@Url.Action("DeleteEmployee", "Order", new { employeeId = order.EmployeeId })">Delete Employee</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
