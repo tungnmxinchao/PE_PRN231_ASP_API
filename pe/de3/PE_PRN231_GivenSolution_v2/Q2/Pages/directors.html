@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Directors</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    <h2>Search Directors</h2>
+    <label>Nationality:</label>
+    <input type="text" id="nationality">
+
+    <label>Gender:</label>
+    <select id="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
+
+    <button onclick="searchDirectors()">Search</button>
+
+    <h3>Directors List</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Gender</th>
+                <th>DOB</th>
+                <th>Description</th>
+                <th>Nationality</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="directorTableBody"></tbody>
+    </table>
+
+    <h3>Director Details</h3>
+    <div id="directorDetails"></div>
+
+    <h3>Movies List</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Release Year</th>
+            </tr>
+        </thead>
+        <tbody id="moviesTableBody"></tbody>
+    </table>
+
+    <script>
+        function searchDirectors() {
+            let nationality = $("#nationality").val();
+            let gender = $("#gender").val();
+
+            $.ajax({
+                url: `http://localhost:5000/api/Director/GetDirectors/${nationality}/${gender}`,
+                type: "GET",
+                success: function (data) {
+                    let tableContent = "";
+                    data.forEach(director => {
+                        tableContent += `
+                                <tr>
+                                    <td>${director.id}</td>
+                                    <td>${director.fullName}</td>
+                                    <td>${director.male}</td>
+                                    <td>${director.dobString}</td>
+                                    <td>${director.description}</td>
+                                    <td>${director.nationality}</td>
+                                    <td><button onclick="getDirectorDetails(${director.id})">Details</button></td>
+                                </tr>
+                            `;
+                    });
+                    $("#directorTableBody").html(tableContent);
+                },
+                error: function () {
+                    alert("Error fetching directors data.");
+                }
+            });
+        }
+
+        function getDirectorDetails(directorId) {
+            $.ajax({
+                url: `http://localhost:5000/api/Director/GetDirector/${directorId}`,
+                type: "GET",
+                success: function (data) {
+                    $("#directorDetails").html(`
+                            <p><strong>Full Name:</strong> ${data.fullName}</p>
+                            <p><strong>Gender:</strong> ${data.male}</p>
+                            <p><strong>DOB:</strong> ${data.dobString}</p>
+                            <p><strong>Nationality:</strong> ${data.nationality}</p>
+                            <p><strong>Description:</strong> ${data.description}</p>
+                        `);
+
+                    let moviesContent = "";
+                    data.movies.forEach(movie => {
+                        moviesContent += `
+                                <tr>
+                                    <td>${movie.title}</td>
+                                    <td>${new Date(movie.releaseDate).getFullYear()}</td>
+                                </tr>
+                            `;
+                    });
+                    $("#moviesTableBody").html(moviesContent);
+                },
+                error: function () {
+                    alert("Error fetching director details.");
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
